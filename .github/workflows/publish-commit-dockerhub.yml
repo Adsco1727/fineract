@@ -1,0 +1,81 @@
+name: Fineract Rebuild Commits
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # we need full history
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Get list of commits after 9f4f1d4f
+        id: commits
+        run: |
+          git fetch origin develop
+          commits=$(git rev-list --reverse 9f4f1d4f..origin/develop)
+          # Build compact JSON array (no newlines, no spaces)
+          commits_json=$(printf '%s\n' $commits | jq -R . | jq -c -s .)
+          echo "commits=$commits_json" >> $GITHUB_OUTPUT
+
+      - name: Loop through commits and build
+        run: |
+          commits='${{ steps.commits.outputs.commits }}'
+          failed_commits=""
+
+          for commit in $(echo "$commits" | jq -r '.[]'); do
+            echo "Checking commit $commit"
+            short_hash=$(git rev-parse --short $commit)
+            long_hash=$commit
+
+            # Skip if image already exists
+            if docker manifest inspect apache/fineract:$long_hash >/dev/null 2>&1; then
+              echo "Skipping $commit (already built)"
+              continue
+            fi
+
+            echo "Building commit $commit"
+            git checkout $commit
+
+            if ! ./gradlew --no-daemon --console=plain :fineract-provider:jib -x test -x cucumber \
+              -Djib.to.auth.username=${{secrets.DOCKERHUB_USER}} \
+              -Djib.to.auth.password=${{secrets.DOCKERHUB_TOKEN}} \
+              -Djib.from.platforms=linux/amd64,linux/arm64 \
+              -Djib.to.image=apache/fineract \
+              -Djib.to.tags=$short_hash,$long_hash; then
+              echo "Build failed for $commit, skipping..."
+              failed_commits="$failed_commits $commit"
+              continue
+            fi
+
+            echo "Finished building $commit"
+          done
+
+          if [ -n "$failed_commits" ]; then
+            echo "======================================"
+            echo "The following commits failed to build:"
+            for fc in $failed_commits; do
+              echo "   - $fc"
+            done
+            echo "======================================"
+            exit 1
+          else
+            echo "All commits built successfully!"
+          fi
