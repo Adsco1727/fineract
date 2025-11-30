@@ -1,0 +1,645 @@
+I can’t create branches or push commits from here, so I won’t be able to perform the repository changes, generate .docx files on GitHub, or open the PR for you. I can, however, produce the exact files, commands, and instructions you need so you (or someone with repo access) can finish this in a few minutes. Below I:
+
+- Show the Markdown file you already prepared (ready to add to docs/).
+- Provide a scaffold for the actionable integration plan (ready to be filled with GH AI outputs).
+- Provide a README with pandoc and GitHub Action examples to convert MD → DOCX.
+- Provide step-by-step git + GitHub UI instructions to create branch, add files, convert locally, and open the PR.
+- Provide a PR body template.
+
+If you want me to finish the integration plan content, I can produce a filled-in document — but I’ll need either read access to both repos (so I can scan them) or you can paste the key files/output from the GH AI prompts here and I’ll synthesize them into the final plan.
+
+Files to add (ready-to-commit)
+
+````markdown name=docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.md
+# A_B_Testing.WIP9 — Fineract + DEX Integration Prompts
+
+Exactly—if the objective is to accelerate Uriel’s **neo‑bank integration** and keep him aligned under the **Fineract umbrella**, then yes: feeding GitHub AI both the **Fineract repo** and the **DEX repo** will give him the necessary context. Fineract provides the compliance‑grade backbone, while the DEX repo shows the decentralized swap logic he’s actively building. Together, GH AI can surface integration points, data models, and API flows that matter.
+
+---
+
+## 🎯 Strategy
+1. **Anchor:** Fineract = umbrella architecture (compliance, accounts, portfolio, payments).  
+2. **Component:** DEX repo = decentralized swap/exchange logic.  
+3. **Objective:** Use GH AI prompts to extract integration data (APIs, models, flows) so Uriel can map DEX into Fineract’s financial services layer.  
+4. **Outcome:** A doc that shows how the DEX repo plugs into Fineract, avoiding duplication and accelerating advanced integration.
+
+---
+
+## 📝 Prompts for GH AI (Fineract + DEX)
+
+### Repo Architecture
+```
+Summarize the Apache Fineract repo architecture. 
+Identify modules for accounts, payments, compliance, and audit. 
+Explain how these modules could serve as umbrella architecture for integrating a decentralized exchange (DEX) repo.
+```
+
+### API Mapping
+```
+List key REST endpoints in Fineract for accounts, transactions, and settlements. 
+Compare them to the DEX repo’s swap and liquidity endpoints. 
+Suggest how to align these APIs for seamless integration.
+```
+
+### Data Models
+```
+Extract the data models from Fineract (clients, accounts, transactions) and from the DEX repo (tokens, swaps, liquidity pools). 
+Map identifiers (ISIN, LEI, UTI) to token/asset models. 
+Highlight overlaps and gaps.
+```
+
+### Event Flow
+```
+Generate a text-based diagram showing Fineract at the top as umbrella architecture. 
+Underneath, show DEX repo, PSP rails, and Exchange modules as subordinate services. 
+Label integration points (API calls, ledger sync, compliance hooks).
+```
+
+### Compliance & Audit
+```
+Explain how Fineract handles audit logging and role-based access. 
+Suggest how DEX repo events (swaps, liquidity changes) can be logged into Fineract’s audit system. 
+Provide example flows.
+```
+
+### Deployment
+```
+Describe how to deploy Fineract and the DEX repo together in Docker or Kubernetes. 
+Show how they can communicate via APIs or message bus. 
+Provide a sample docker-compose snippet.
+```
+
+---
+
+## 📂 Filing Suggestion
+- `A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.docx`
+
+Index entry:
+```
+| File Name                                   | Iteration | Date       | Summary of Content                                | Status |
+|---------------------------------------------|-----------|------------|---------------------------------------------------|--------|
+| A_B_Testing.WIP9-FineractDEXIntegrationPrompts| v1        | 2025-11-30 | GH AI prompts for Uriel: Fineract + DEX integration acceleration | Draft  |
+```
+
+---
+Notes:
+- Remove any secrets before committing or sharing publicly.
+- If you'd like this committed into apache/fineract, create a branch named `DPO.Finetrac` and add this file to docs/.  
+````
+
+````markdown name=docs/Fineract-DEX-Integration-Plan-2025-11-30.md
+# Fineract ↔ DEX Integration Plan — 2025-11-30
+
+Status: Draft  
+Prepared by: (fill)  
+Related repos: apache/fineract, Direct-Private-Offers/dpo-dex
+
+## Summary
+Purpose: Outline how the DEX (dpo-dex) will integrate under the Fineract umbrella (accounts, compliance, ledger) and provide a concrete set of tasks and artifacts to implement integration.
+
+## Key findings (to be filled by GH AI scan of both repos)
+- Fineract modules relevant:
+  - Accounts / ledgers
+  - Transactions / settlements
+  - Audit & event logging
+  - Access control & roles
+- DEX components relevant:
+  - Swap endpoints and contracts
+  - Liquidity pool management
+  - Token models and identifiers
+  - Event streams (on-chain events if any) and off-chain services
+
+## API Mapping
+- Fineract endpoints (fill after scan):
+  - GET/POST /accounts
+  - POST /transactions
+  - GET /ledger/entries
+  - ...
+- DEX endpoints (fill after scan):
+  - POST /swap
+  - GET /pools
+  - POST /liquidity/add
+  - ...
+- Suggested alignment:
+  - Map DEX swap -> Fineract transaction with fields: {accountId, externalAssetId, amount, counterparty, metadata}
+  - Use consistent id mapping: token contract address -> externalAssetId; maintain cross-reference table in Fineract.
+
+## Data model mapping
+- Fineract model examples:
+  - Client: {clientId, name, identifiers}
+  - Account: {accountId, accountType, ledgerId}
+  - Transaction: {transactionId, debitAccount, creditAccount, amount, currency, timestamp}
+- DEX model examples:
+  - Token: {tokenId (contract address), symbol, decimals}
+  - Swap: {swapId, fromToken, toToken, amountIn, amountOut, timestamp}
+  - LiquidityPool: {poolId, tokens[], reserves[]}
+- Mapping table (example row)
+  - DEX token.contractAddress ↔ Fineract externalAssetId
+  - Swap.swapId ↔ Transaction.transactionId (or ledger entry reference)
+
+## Event flows (text diagram)
+Fineract (Umbrella)
+  ├─ Ledger / Accounts / Audit
+  ├─ Compliance service
+  └─ Integration adapter (REST / queue)
+        ↕
+DEX Service (dpo-dex) — Swap API / on-chain listeners
+        ↕
+PSP rails / Settlement
+
+Label integration points:
+- API call: DEX swap -> Fineract integration adapter POST /transactions
+- Ledger sync: After successful swap, adapter writes ledger entry in Fineract
+- Reconciliation: Periodic job compares DEX on-chain state with Fineract ledger
+
+## Integration tasks and priorities (conservative estimates)
+1. Create integration adapter service (REST + queue) — Medium
+   - Accept DEX swap webhooks, map to Fineract transaction, call Fineract API
+2. Asset mapping table in Fineract — Small
+   - Maintain mapping from token contract -> externalAssetId
+3. Audit logging hook — Small
+   - On every mapped swap, append audit entry to Fineract audit tables
+4. Reconciliation job (daily) — Medium
+   - Fetch on-chain or DEX state and reconcile with ledger
+5. End-to-end tests and security review — Large
+   - KYC/AML checks, role-based access, signing, rate-limits
+
+## Sample request / response examples
+- Example: DEX sends swap webhook (example)
+  POST /integration/dex/swap
+  {
+    "swapId": "0xabc...",
+    "fromToken": "0xTokenA",
+    "toToken": "0xTokenB",
+    "amountIn": "1000000000000000000",
+    "amountOut": "490000000000000000",
+    "userAccount": "user-123",
+    "timestamp": "2025-11-30T12:34:56Z"
+  }
+- Integration adapter -> Fineract POST /transactions (example)
+  {
+    "transactionReference": "dex-swap-0xabc...",
+    "debitAccountId": "fineract:wallet:user-123:TokenA",
+    "creditAccountId": "fineract:wallet:liquidity-pool:TokenA",
+    "amount": "1.0",
+    "currency": "TokenA",
+    "metadata": { "dexSwapId": "0xabc..." }
+  }
+
+## Deployment (sample docker-compose)
+```yaml
+version: '3.8'
+services:
+  fineract:
+    image: apache/fineract:latest
+    ports: ['8080:8080']
+    environment:
+      - DB_HOST=postgres
+  dpo-dex:
+    image: dpo-dex:latest
+    ports: ['3000:3000']
+  integration-adapter:
+    build: ./integration-adapter
+    environment:
+      - FINERACT_BASE_URL=http://fineract:8080
+      - DEX_BASE_URL=http://dpo-dex:3000
+    depends_on:
+      - fineract
+      - dpo-dex
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_PASSWORD=change-me
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+```
+
+## Compliance & Audit Hooks
+- On each mapped swap:
+  - Create audit record: {eventType: "DEX_SWAP", actor, timestamp, details}
+  - Record actor identity: map wallet <> Fineract client (KYC link)
+  - Store raw DEX event payload in an append-only audit store
+- Role-based access:
+  - Only integration-adapter service account has write access to transaction endpoints
+  - Use service tokens and IP allowlist for extra control
+
+## Tests & Validation
+- Unit test: mapping logic for token decimals and amounts
+- Integration test: end-to-end swap -> ledger write -> audit entry
+- Reconciliation test: simulated out-of-sync detection and repair flow
+
+## Next steps and backlog (short)
+1. Run automated GH AI prompts against both repos and fill “Key findings” + exact endpoints and models.
+2. Implement integration-adapter skeleton (1–2 days).
+3. Implement asset mapping table and admin UI (1 day).
+4. Implement audit hook and tests (1–2 days).
+5. Security review and E2E tests (3+ days).
+
+## Appendix
+- Links:
+  - Fineract repo: https://github.com/apache/fineract
+  - DEX repo: https://github.com/Direct-Private-Offers/dpo-dex
+- (Add extracted endpoints, file references, and code locations here after scans.)
+````
+
+````markdown name=docs/README.md
+# docs/ — docx generation & instructions
+
+This folder contains integration prompt and plan markdown files. Two docx files are desired:
+- docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.docx
+- docs/Fineract-DEX-Integration-Plan-2025-11-30.docx
+
+If DOCX conversion is not done automatically, you can generate locally using pandoc.
+
+Local pandoc example (install pandoc first):
+- Convert a single file:
+  pandoc docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.md -o docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.docx
+
+- Convert and include a table of contents:
+  pandoc --toc docs/Fineract-DEX-Integration-Plan-2025-11-30.md -o docs/Fineract-DEX-Integration-Plan-2025-11-30.docx
+
+GitHub Action to convert on push (example workflow: .github/workflows/md-to-docx.yml)
+```yaml
+name: Convert MD to DOCX
+on:
+  push:
+    branches:
+      - DPO.Finetrac
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Convert prompts
+        run: |
+          pandoc docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.md -o docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.docx
+          pandoc --toc docs/Fineract-DEX-Integration-Plan-2025-11-30.md -o docs/Fineract-DEX-Integration-Plan-2025-11-30.docx
+      - name: Commit converted files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/*.docx
+          git commit -m "Add generated DOCX files" || echo "No changes to commit"
+          git push origin DPO.Finetrac
+```
+
+Notes:
+- Ensure the workflow has permission to push to the branch (set the workflow to run on branch DPO.Finetrac or open a pull request from the branch).
+- If using a fork-based workflow, check token permissions for push.
+````
+
+Commands & steps to perform manually (git CLI)
+
+1) Clone repo (if you haven't):
+- git clone https://github.com/apache/fineract.git
+- cd fineract
+
+2) Create branch and switch:
+- git checkout -b DPO.Finetrac
+
+3) Add files (create docs/ if absent), paste the 3 files above into:
+- docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.md
+- docs/Fineract-DEX-Integration-Plan-2025-11-30.md
+- docs/README.md
+
+4) Commit & push:
+- git add docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.md docs/Fineract-DEX-Integration-Plan-2025-11-30.md docs/README.md
+- git commit -m "DPO.Finetrac: add integration prompts and initial plan scaffold"
+- git push --set-upstream origin DPO.Finetrac
+
+(If the repo requires PRs from forks or branch protection, create a fork and push there, then open PR.)
+
+Create the PR (GitHub UI steps)
+- Open https://github.com/apache/fineract
+- Click "Compare & pull request" (or "Pull requests" → "New pull request")
+- Set base: main, compare: DPO.Finetrac
+- Title: DPO.Finetrac: Add Fineract <-> DEX integration prompts and integration plan
+- Body: Use the PR body template below
+- Create Pull Request
+
+PR body template (paste into PR body)
+
+Title:
+DPO.Finetrac: Add Fineract <-> DEX integration prompts and integration plan
+
+Body:
+- What: Add GH AI prompts and an actionable integration-plan scaffold for integrating Direct-Private-Offers/dpo-dex with apache/fineract. Includes docs and conversion instructions.
+- Why: To accelerate Uriel's neo-bank integration by surfacing APIs, data models, and audit hooks and producing a step-by-step plan.
+- Files added:
+  - docs/A_B_Testing.WIP9-FineractDEXIntegrationPrompts-2025-11-30.md
+  - docs/Fineract-DEX-Integration-Plan-2025-11-30.md
+  - docs/README.md (docx generation instructions)
+- Notes:
+  - No secrets included.
+  - Next: run the GH AI prompts across both repos to populate the plan with exact endpoints and file references (I can help synthesize the outputs).
+
+Link to DEX repo: https://github.com/Direct-Private-Offers/dpo-dex
+
+If you want a bot to produce the .docx automatically, enable Actions in the repository and add the workflow above on branch DPO.Finetrac.
+
+How to run the GH AI prompts across both repos (manual process)
+Option A — Using the repository Copilot Chat UI:
+1. Open apache/fineract in the browser, open the top-of-repo Copilot Chat.
+2. Feed the "Repo Architecture" prompt (from the prompts file). Ask Copilot to summarize modules and list endpoint files (it will often point to specific paths like src/.. or api/..).
+3. Save the output, then switch to Direct-Private-Offers/dpo-dex and run the same prompts there to extract swap endpoints, token models, and event listeners.
+4. Copy the outputs from both runs and paste them into the integration-plan doc under the appropriate sections (API Mapping, Data model mapping, Key findings).
+5. Repeat for other prompts (Event Flow, Compliance & Audit, Deployment).
+6. Once the plan is complete, convert the MD → DOCX with pandoc or via the Actions workflow.
+
+Option B — If you prefer me to synthesize:
+- Provide either:
+  - Read access to both repos (or paste the critical files/paths such as API controllers, REST route definitions, model classes), OR
+  - Copy/paste the GH AI outputs from your runs here.
+- I will then produce a fully populated docs/Fineract-DEX-Integration-Plan-2025-11-30.md and a PR-ready PR body.
+
+Would you like me to:
+A) Prepare the fully populated integration document now based on typical Fineract/DEX integration patterns (conservative, best-effort) — I can generate that immediately here; OR
+B) Wait until you run the prompts in both repos and paste the outputs (or grant read access), then I'll create the complete plan and docx content to commit?
+
+If you want me to proceed with A, I’ll synthesize a complete integration-plan draft (with specific sample code snippets, more detailed task breakdowns, and a fleshed-out docker-compose) using best-practice assumptions. If you prefer full accuracy tied to repo code, choose B and paste the prompt outputs or give read access.
+
+````markdown name=docs/Fineract-DEX-Integration-Plan-2025-11-30.md
+# Fineract ↔ DEX Integration Plan — 2025-11-30
+
+Purpose
+- Enable Direct-Private-Offers/dpo-dex (DEX) to operate as a subordinate, pluggable service under Apache Fineract’s umbrella architecture.
+- Define concrete integration points, data-model mappings, event flows, audit/RBAC hooks, deployment example, and a prioritized task list.
+
+High-level stance
+- Fineract = umbrella architecture: canonical source of clients, accounts, ledgers, compliance, settlements, and audit trails.
+- DEX = component/service: token/pair/pool management, swap execution, on-chain/off-chain listeners, and user wallet integration.
+- Integration pattern: lightweight integration adapter(s) that translate DEX events into Fineract transactions/journal entries and ensure compliance/audit.
+
+1) Fineract core modules (summary)
+- Clients
+  - Persistent KYC/KYB records, party identifiers (externalIds, legal identifiers such as LEI).
+  - Client lifecycle management.
+- Accounts
+  - Account objects (savings, checking, wallets, externalAsset-linked accounts).
+  - Ledger-backed balances and accounting integration.
+- Portfolio
+  - Product definitions, accounts grouped by client/product.
+- Payments & Settlements
+  - REST endpoints to initiate and settle transactions, settlement batches, external rails adapters.
+- Compliance
+  - KYC/AML checks, rules engine, flags, holds, sanctions screening.
+- Audit & Logging
+  - Append-only audit records, immutability patterns, who/when/what for financial entries.
+  - Transaction trails and reconciliation interfaces.
+
+2) DEX repo core modules (summary)
+- Tokens
+  - Token metadata (contract address, symbol, decimals, metadata, off-chain identifiers).
+- Pairs / Pools
+  - Liquidity pools, reserves, pool tokens, pool identifiers.
+- Swaps
+  - Swap engine (price math, slippage, routing), swap endpoints and transaction receipts.
+- Wallet integration
+  - User wallet binding, signature flows, private-key/user account mapping (often off-ledger).
+- Event listeners
+  - On-chain event watchers (SwapExecuted, LiquidityAdded/Removed), webhook emitters.
+- Admin & Metadata
+  - Token registration, pool lifecycle management, fee configuration.
+
+3) REST endpoint inventory & suggested alignment
+Note: exact file/route names vary by repo. Below are canonical endpoints to extract and align.
+
+Fineract (canonical endpoints to locate/use)
+- Clients
+  - GET /clients
+  - GET /clients/{clientId}
+  - POST /clients
+- Accounts
+  - GET /accounts/{accountId}
+  - POST /accounts (create account/wallet)
+  - GET /accounts?clientId={id}
+- Transactions / Ledger
+  - POST /transactions (create financial transaction)
+  - GET /transactions/{transactionId}
+  - GET /journalentries or /ledgers (ledger queries)
+- Settlements / Batches
+  - POST /settlements
+  - GET /settlements/{id}
+- Audit
+  - GET /audit/records
+- Authentication/Service Accounts
+  - OAuth/service-token endpoints or API-key usage for service-to-service calls
+
+DEX (common endpoints to map)
+- Tokens & Metadata
+  - GET /tokens
+  - POST /tokens/register
+- Pools / Pairs
+  - GET /pools
+  - POST /pools/create
+- Swaps
+  - POST /swap (request a swap)
+  - GET /swap/{swapId}/status
+- Liquidity management
+  - POST /liquidity/add
+  - POST /liquidity/remove
+- Webhooks / Events
+  - POST /webhooks (to register)
+  - emits swap, liquidity, pool events
+
+Suggested API alignment (patterns)
+- DEX swap -> Fineract transaction:
+  - DEX emits a webhook on swap finalization: POST /integration/dex/swap
+  - Integration adapter translates swap -> POST /transactions in Fineract, storing dexSwapId in metadata.
+- Token registration -> Asset record:
+  - When a token is registered in DEX, adapter creates/updates an externalAsset record in Fineract (mapping token contract address -> externalAssetId).
+- Liquidity events -> Journal entries + audit:
+  - Liquidity adds/removes create corresponding ledger journal entries, plus a stored audit payload for reconciliation.
+- Reconciliation endpoints:
+  - Periodic jobs in Fineract call DEX endpoints (GET /pools, GET /swaps?since=) for reconciliation.
+
+4) Data-model mapping (concise)
+
+Fineract models (examples)
+- Client
+  - { clientId, externalIds: [LEI, otherIds], name, kycStatus }
+- Account
+  - { accountId, clientId, accountType, currency, externalAssetId?, ledgerId }
+- Transaction
+  - { transactionId, debitAccountId, creditAccountId, amount, currency, timestamp, metadata }
+- JournalEntry
+  - { journalEntryId, ledgerId, entries: [{accountId, debit, credit}], timestamp }
+
+DEX models (examples)
+- Token
+  - { tokenId (contract address), symbol, decimals, metadata, identifiers: {ISIN?, externalId?} }
+- Pair / Pool
+  - { poolId, tokenA, tokenB, reserves: {reserveA, reserveB}, lpToken }
+- Swap
+  - { swapId, poolId, fromToken, toToken, amountIn, amountOut, userWallet, txHash, status, timestamp }
+
+Identifier mapping (ISIN, LEI, UTI)
+- LEI (Legal Entity Identifier)
+  - Map LEI -> Client.externalIds for any counterparty organizations (market makers, liquidity providers).
+- ISIN (Security Identifier)
+  - If token represents a regulated security, store ISIN as Token.identifiers.isin and mirrored in Fineract external asset metadata.
+- UTI (Unique Transaction Identifier)
+  - Use UTI for cross-system transaction correlation: populate Transaction.metadata.uti = dexSwap.uti or generate UTI at integration adapter time.
+- Recommended canonical fields
+  - Fineract externalAsset: { externalAssetId, tokenContractAddress, symbol, ISIN?, issuerLEI? }
+  - Link: Token.tokenId (contract) ↔ externalAsset.externalAssetId
+
+5) Text-based event flow diagram (top-down)
+Fineract (Umbrella)
+  ├─ API: /transactions, /accounts, /clients, /audit
+  ├─ Integration Adapter (service)
+  │     ├─ POST /integration/dex/swap  <--- DEX webhook
+  │     ├─ GET /integration/dex/pools   <--- periodic reconciliation
+  │     └─ Calls -> Fineract POST /transactions, POST /journalentries
+  ├─ Compliance Service (KYC/AML)
+  └─ Audit Store
+
+DEX (Component)
+  ├─ REST API: /swap, /pools, /tokens
+  ├─ On-chain Listeners -> emits events
+  └─ Webhook -> Integration Adapter
+
+PSP / External Exchange (Rails)
+  ├─ Settlement endpoints
+  └─ Settlement adapter <-> Fineract Settlement module
+
+Integration points (labels)
+- API calls: DEX webhook -> Integration adapter -> Fineract /transactions
+- Ledger sync: adapter writes JournalEntry/transaction; reconciliation job compares DEX on-chain state -> ledger
+- Compliance hooks: adapter queries Compliance service before posting high-value swaps (KYC/AML)
+- Audit: adapter stores raw DEX payload + mapping record in Fineract audit store
+
+6) Audit logging & RBAC — how to capture DEX events
+- RBAC pattern
+  - Create a dedicated service account for integration-adapter with a minimal scope: create transaction, create audit record.
+  - Limit write permissions to the adapter’s client credentials, enforce IP restrictions and rotate keys.
+- Audit logging pattern
+  - On every adapter action that writes a transaction, also create an audit record:
+    - Audit record fields: { eventType: "DEX_SWAP"|"DEX_LIQUIDITY", actor: "integration-adapter", clientId, dexSwapId, rawPayload, timestamp, result, correlationId }
+  - Store rawPayload as compressed JSON in append-only audit table/blob store to preserve forensic data.
+- Capture chain-of-custody
+  - Add correlationId/UTI to both DEX swap and Fineract transaction.
+- Reconciliation & alerts
+  - Periodic reconciliation job that compares DEX events/chain-state with Fineract ledger; generate mismatch alerts and remediation flows (replay, repair).
+- Retention & compliance
+  - Keep audit records per regulatory retention (configurable), exportable for regulators.
+- Example flow
+  1. DEX emits SwapExecuted webhook -> adapter.
+  2. Adapter validates KYC via Fineract Compliance service.
+  3. Adapter writes Transaction into Fineract, writes JournalEntry, and creates Audit record with raw DEX payload.
+  4. Adapter returns acknowledgment to DEX; DEX marks swap finalized.
+
+7) Sample request/response examples
+
+DEX -> Integration Adapter (webhook)
+```http
+POST /integration/dex/swap
+Content-Type: application/json
+{
+  "swapId":"0xabc123",
+  "poolId":"pool-0x01",
+  "fromToken":"0xTokenA",
+  "toToken":"0xTokenB",
+  "amountIn":"1000000000000000000",
+  "amountOut":"495000000000000000",
+  "userWallet":"0xUserWallet",
+  "txHash":"0xchainTx",
+  "timestamp":"2025-11-30T12:34:56Z",
+  "metadata": { "routing": ["pool-0x01"], "slippage":"0.5%" }
+}
+```
+
+Adapter -> Fineract (create transaction)
+```http
+POST /transactions
+Authorization: Bearer <integration-service-token>
+Content-Type: application/json
+{
+  "transactionReference": "dex-swap-0xabc123",
+  "debitAccountId": "fineract:wallet:0xUserWallet:TokenA",
+  "creditAccountId": "fineract:pool:pool-0x01:TokenA",
+  "amount": "1.0",
+  "currency": "TokenA",
+  "metadata": { "dexSwapId":"0xabc123", "dexTxHash":"0xchainTx", "uti":"UTI-2025-11-30-0001" }
+}
+```
+
+8) Sample docker-compose (minimal)
+```yaml
+version: '3.8'
+services:
+  fineract:
+    image: apache/fineract:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - DB_HOST=postgres
+    depends_on:
+      - postgres
+
+  dpo-dex:
+    image: dpo-dex:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://integration-adapter:4000/integration/dex/swap
+
+  integration-adapter:
+    build: ./integration-adapter
+    ports:
+      - "4000:4000"
+    environment:
+      - FINERACT_BASE_URL=http://fineract:8080
+      - DEX_BASE_URL=http://dpo-dex:3000
+      - SERVICE_TOKEN=change-me
+    depends_on:
+      - fineract
+      - dpo-dex
+
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_PASSWORD=change-me
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+```
+
+9) Task breakdown & priorities (estimates)
+- 1. Discover & map exact endpoints and model classes in both repos — Small (0.5 day)
+  - Produce exact file references and examples.
+- 2. Implement integration-adapter skeleton (webhook receiver, mapper, Fineract client) — Medium (1–2 days)
+- 3. Asset mapping table in Fineract (externalAsset records) + admin UI — Small (1 day)
+- 4. Audit record schema + persistence of raw DEX payload — Small (0.5–1 day)
+- 5. Reconciliation job (periodic) + reporting — Medium (1–2 days)
+- 6. End-to-end tests (swap -> ledger -> audit -> reconcile) — Large (3+ days)
+- 7. Security review, RBAC, secrets rotation, and monitoring — Large (3+ days)
+
+10) Recommendations & next steps
+- Run the GH AI prompts against both repos to extract exact endpoint/filename references (controllers, route files, model classes) and paste outputs here or grant read access.
+- Implement a small integration-adapter service in a separate repo/folder with:
+  - Webhook receiver
+  - Fineract client (service-token based)
+  - Mapping logic (token contract -> externalAsset)
+  - Audit writer and reconciler
+- Enforce RBAC: one service account for adapter with minimal scope.
+- Add CI job or GitHub Action to generate .docx from these markdowns for stakeholder distribution.
+
+Appendix: links / references
+- Fineract repo: https://github.com/apache/fineract
+- DEX repo: https://github.com/Direct-Private-Offers/dpo-dex
+
+---
+Notes
+- This plan is intentionally repo-agnostic where file paths were not inspected. For exact code-level mappings and accurate endpoint names, run the GH AI prompts per your earlier plan (or grant read access) and we will populate the "Key findings" and "API Mapping" sections with file references and example lines.
+````
